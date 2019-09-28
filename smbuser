@@ -1,0 +1,20 @@
+clear_users() {
+  rm -fr /etc/samba/smbpasswd
+  cat /etc/passwd | awk -F':' '{ if ($3<1000 || $3>=65533)  print}' > /tmp/passwd
+  cat /etc/group | awk -F':' '{ if ($3<1000 || $3>=65533)  print}' > /tmp/group
+  cp -R /tmp/passwd /etc/passwd
+  cp -R /tmp/group /etc/group
+}
+
+add_users() {
+  uid=$1
+  username=$2
+  passwd=$3
+	adduser -s /sbin/nologin -D -H -u $uid $username
+	printf "$passwd\n$passwd\n" | smbpasswd -c /etc/samba/smb.conf -a -s $username
+}
+
+case $1 in
+  clear)        clear_users;;
+  add)          add_users $2 $3 $4;;
+esac

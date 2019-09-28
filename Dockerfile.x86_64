@@ -1,0 +1,19 @@
+FROM alpine
+
+ENV TZ=Asia/Shanghai
+
+COPY smbuser /user/bin/
+
+RUN apk --no-cache --no-progress upgrade && \
+    apk --no-cache --no-progress add tzdata samba && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    addgroup -S smb && \
+    adduser -S -D -H -h /tmp -s /sbin/nologin -G smb -g 'Samba User' smbuser && \
+    chmod +x /usr/bin/smbuser
+
+EXPOSE 137/udp 138/udp 139 445
+
+HEALTHCHECK --interval=600s --timeout=15s \
+            CMD smbclient -L '\\localhost' -U '%' -m SMB3
+
+CMD ["/init.sh", ,"daemon"]
