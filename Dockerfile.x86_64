@@ -2,7 +2,7 @@ FROM alpine
 
 ENV TZ=Asia/Shanghai
 
-COPY smbuser /user/bin/
+COPY smbuser /usr/bin/
 
 RUN apk --no-cache --no-progress upgrade && \
     apk --no-cache --no-progress add tzdata samba && \
