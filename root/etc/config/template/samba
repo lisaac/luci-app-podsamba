@@ -1,0 +1,5 @@
+config 'samba'
+        option 'name' 'LuCI'
+        option 'description' 'LuCI-Plugin-Samba'
+        option 'workgroup' 'WORKGROUP'
+        option 'homes' '0'
