@@ -34,19 +34,19 @@ function gen_map(c_name)
   -- for edit template
   local tmpl = s:taboption("template", Value, "_tmpl",
     translate("Edit the template that is used for generating the samba configuration."), 
-    translate("This is the content of the file '/etc/samba/smb.conf.template' from which your samba configuration will be generated. Values enclosed by pipe symbols ('|') should not be changed. They get their values from the 'General Settings' tab."))
+    translate("This is the content of the file '/etc/config/template/smb.conf.template' from which your samba configuration will be generated. Values enclosed by pipe symbols ('|') should not be changed. They get their values from the 'General Settings' tab."))
 
   tmpl.template = "cbi/tvalue"
   tmpl.rows = 20
 
   -- functions for template editing
   function tmpl.cfgvalue(self, section)
-    return nixio.fs.readfile(SYSROOT .. "/etc/config/template/smb.conf.template")
+    return nixio.fs.readfile("/etc/config/template/smb.conf.template")
   end
 
   function tmpl.write(self, section, value)
     value = value:gsub("\r\n?", "\n")
-    nixio.fs.writefile(SYSROOT .. "/etc/config/template/smb.conf.template", value)
+    nixio.fs.writefile("/etc/config/template/smb.conf.template", value)
   end
 
   -- for users setting
@@ -172,13 +172,16 @@ if exists ~= 0 then
     res = dk.containers:start(pod_name)
   end
   if res and res.code ~= 204 then return end
+  local map_name = "luci_plugin_samba"
+  if not nixio.fs.access("/etc/config/"..map_name) then
+    nixio.fs.copy(SYSROOT .. "/etc/config/template/samba", "/etc/config/"..map_name)
+  end
+  nixio.fs.mkdirr("/etc/config/template/")
+  if not nixio.fs.access("/etc/config/template/smb.conf.template") then
+    nixio.fs.copy(SYSROOT .. "/etc/config/template/smb.conf.template", "/etc/config/template/smb.conf.template")
+  end
   res = dk.containers:get_archive(pod_name, {path = "/etc/samba/smbpasswd"})
   if res and res.code == 200 then
-    local map_name = "luci_plugin_samba"
-    if not nixio.fs.access("/etc/config/"..map_name) then
-      local tp = nixio.fs.readfile(SYSROOT .. "/etc/config/template/samba")
-      nixio.fs.writefile("/etc/config/"..map_name, tp)
-    end
     nixio.fs.mkdirr("/tmp/conf.d/"..pod_name)
     nixio.fs.writefile("/tmp/conf.d/"..pod_name.."/pod_conf.tar", table.concat(res.body))
     luci.util.exec("tar xf /tmp/conf.d/"..pod_name.."/pod_conf.tar -C /tmp/conf.d/"..pod_name.."/")

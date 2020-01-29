@@ -45,7 +45,7 @@ docker restart luci
 
 ## 说明
 - 容器名为`luci_plugin_samba`, 请勿修改
-- 容器默认通过`host`网络进行部署, 如果想要修改, 请在创建时自行修改内容, 若改为`bridge`模式, 确保暴露`139/445`端口
+- 容器默认通过`host`网络进行部署, 如果想要修改, 请在创建时自行修改内容, 若改为`bridge`模式, 确保暴露`137/138/139/445`端口
 - 创建容器时默认只挂载`/media`到容器内部, 需要其他目录, 请在创建时自行添加
 - 配置文件保存在宿主机`$HOME/pods/luci/conf.d/config/luci_plugin_samba`中
 

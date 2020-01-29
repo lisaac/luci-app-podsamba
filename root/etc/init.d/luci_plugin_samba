@@ -12,12 +12,10 @@ smb_header() {
   config_get name        $1 name
   config_get workgroup   $1 workgroup
   config_get description $1 description
-  config_get charset     $1 charset     "UTF-8"
 
   sed -e "s#|NAME|#$name#g" \
       -e "s#|WORKGROUP|#$workgroup#g" \
       -e "s#|DESCRIPTION|#$description#g" \
-      -e "s#|CHARSET|#$charset#g" \
       $IPKG_INSTROOT/etc/config/template/smb.conf.template > $SMB_CONF
 }
 
