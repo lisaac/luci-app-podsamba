@@ -1,3 +1,5 @@
+#!/bin/sh
+
 clear_users() {
   rm -fr /etc/samba/smbpasswd
   cat /etc/passwd | awk -F':' '{ if ($3<1000 || $3>=65533)  print}' > /tmp/passwd
@@ -10,8 +12,8 @@ add_users() {
   uid=$1
   username=$2
   passwd=$3
-	adduser -s /sbin/nologin -D -H -u $uid $username
-	printf "$passwd\n$passwd\n" | smbpasswd -c /etc/samba/smb.conf -a -s $username
+  adduser -s /sbin/nologin -D -H -u $uid $username
+  printf "$passwd\n$passwd\n" | smbpasswd -c /etc/samba/smb.conf -a -s $username
 }
 
 case $1 in
