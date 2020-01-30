@@ -1,7 +1,7 @@
 #!/bin/sh
 
-killall smbd 2&> /dev/null
-killall nmbd 2&> /dev/null
+kill -9 $(pidof smbd) 2&> /dev/null
+kill -9 $(pidof nmbd) 2&> /dev/null
 nmbd -D
 smbd --no-process-group &
 

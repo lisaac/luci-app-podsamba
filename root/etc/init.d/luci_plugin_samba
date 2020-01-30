@@ -16,7 +16,7 @@ smb_header() {
   sed -e "s#|NAME|#$name#g" \
       -e "s#|WORKGROUP|#$workgroup#g" \
       -e "s#|DESCRIPTION|#$description#g" \
-      $IPKG_INSTROOT/etc/config/template/smb.conf.template > $SMB_CONF
+      /etc/config/template/smb.conf.template > $SMB_CONF
 }
 
 smb_add_share() {
@@ -40,13 +40,15 @@ smb_add_share() {
 
   [ -z "$name" -o -z "$path" ] && return
 
-  echo -e "\n[$name]\n\tpath = $path" >> $SMB_CONF
-  [ -n "$users" ] && echo -e "\tvalid users = $users" >> $SMB_CONF
-  [ -n "$read_only" ] && echo -e "\tread only = $read_only" >> $SMB_CONF
-  [ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> $SMB_CONF
-  [ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> $SMB_CONF
-  [ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> $SMB_CONF
-  [ -n "$browseable" ] && echo -e "\tbrowseable = $browseable" >> $SMB_CONF
+  echo -e "\n[$name]\n  path = $path" >> $SMB_CONF
+  [ -n "$users" ] && echo -e "  valid users = $users" >> $SMB_CONF
+  [ -n "$read_only" ] && echo -e "  read only = $read_only" >> $SMB_CONF
+  [ -n "$guest_ok" ] && echo -e "  guest ok = $guest_ok" >> $SMB_CONF
+  [ -n "$create_mask" ] && echo -e "  create mask = $create_mask" >> $SMB_CONF
+  [ -n "$dir_mask" ] && echo -e "  directory mask = $dir_mask" >> $SMB_CONF
+  [ -n "$browseable" ] && echo -e "  browseable = $browseable" >> $SMB_CONF
+  echo "  veto files = /._*/.apdisk/.AppleDouble/.DS_Store/.TemporaryItems/.Trashes/desktop.ini/ehthumbs.db/Network Trash Folder/Temporary Items/Thumbs.db/" >> $SMB_CONF
+  echo "  delete veto files = yes" >> $SMB_CONF
 }
 
 init_config() {
@@ -73,15 +75,15 @@ start() {
   SAMBA_STATUS=$(docker inspect $CONTAINER_NAME | grep Status |awk -F'"' 'NR==1{print $4}')
   if [ $SAMBA_STATUS=="running" ]; then
     docker exec $CONTAINER_NAME smbuser clear && \
-    config_foreach smb_add_user sambauser && \
+    config_foreach smb_add_user sambauser ; \
     docker cp $SMB_CONF $CONTAINER_NAME:/etc/samba/smb.conf && \
-    docker exec $CONTAINER_NAME /init.sh
+    docker restart $CONTAINER_NAME
   elif [ $SAMBA_STATUS=="exited" ]; then
     docker start $CONTAINER_NAME && \
     docker exec $CONTAINER_NAME smbuser clear && \
-    config_foreach smb_add_user sambauser && \
+    config_foreach smb_add_user sambauser ; \
     docker cp $SMB_CONF $CONTAINER_NAME:/etc/samba/smb.conf && \
-    docker exec $CONTAINER_NAME /init.sh
+    docker restart $CONTAINER_NAME
   elif [ $SAMBA_STATUS=="" ]; then
     docker pull lisaac/luci-plugin-samba && \
     docker run  -d \
@@ -91,8 +93,8 @@ start() {
                 --network host \
                 -v /media:/media:rslave \
                 lisaac/luci-plugin-samba  && \
-    config_foreach smb_add_user sambauser && \
+    config_foreach smb_add_user sambauser ; \
     docker cp $SMB_CONF $CONTAINER_NAME:/etc/samba/smb.conf && \
-    docker exec $CONTAINER_NAME /init.sh
+    docker restart $CONTAINER_NAME
   fi
 }

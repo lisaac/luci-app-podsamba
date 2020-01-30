@@ -1,12 +1,14 @@
 FROM alpine
 
+MAINTAINER lisaac <lisaac.cn@gmail.com>
+
 ENV TZ=Asia/Shanghai
 
 COPY smbuser /usr/bin/
 COPY init.sh /
 
 RUN apk --no-cache --no-progress upgrade && \
-    apk --no-cache --no-progress add tzdata samba && \
+    apk --no-cache --no-progress add tzdata samba tini && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     addgroup -S smb && \
     adduser -S -D -H -h /tmp -s /sbin/nologin -G smb -g 'Samba User' smbuser && \
@@ -20,4 +22,4 @@ VOLUME ["/etc/samba"]
 HEALTHCHECK --interval=600s --timeout=15s \
             CMD smbclient -L '\\localhost' -U '%' -m SMB3
 
-CMD ["/init.sh", "daemon"]
+CMD ["/sbin/tini", "--", "/init.sh", "daemon"]

@@ -10,15 +10,16 @@ $Id$
 
 local docker = require "luci.docker"
 local dk = docker.new()
-local image_name = "lisaac/luci-plugin-samba"
 local pod_name= "luci_plugin_samba"
-local containers = dk:list(nil, {all = 1, filters = {ancestor={image_name}}}).body
+local image_name = "luci-plugin-samba"
+--, filters = {ancestor={image_name}}
+local containers = dk:list(nil, {all = true}).body
 local SYSROOT = os.getenv("LUCI_SYSROOT")
 
 function gen_map(c_name)
   map_name = c_name
-  local m = Map(map_name, translate("Samba"))
-  local s = m:section(TypedSection, "samba", translate("Container")..":"..c_name, translate("Using Host network by default"))
+  local m = Map(map_name, translate("Samba"), translate("Container")..":"..c_name)
+  local s = m:section(TypedSection, "samba")
   s.anonymous = true
 
   s:tab("general",  translate("General Settings"))
@@ -32,12 +33,9 @@ function gen_map(c_name)
   -- s:taboption("general",Value, "hosts_deny",translate("Deny hosts to visit samba")).datatype="ip4addr"
 
   -- for edit template
-  local tmpl = s:taboption("template", Value, "_tmpl",
-    translate("Edit the template that is used for generating the samba configuration."), 
-    translate("This is the content of the file '/etc/config/template/smb.conf.template' from which your samba configuration will be generated. Values enclosed by pipe symbols ('|') should not be changed. They get their values from the 'General Settings' tab."))
-
+  local tmpl = s:taboption("template", Value, "_tmpl", translate("Edit the template that is used for generating the samba configuration."), translate("This is the content of the file '/etc/config/template/smb.conf.template' from which your samba configuration will be generated. Values enclosed by pipe symbols ('|') should not be changed. They get their values from the 'General Settings' tab."))
   tmpl.template = "cbi/tvalue"
-  tmpl.rows = 20
+  tmpl.rows = 30
 
   -- functions for template editing
   function tmpl.cfgvalue(self, section)
@@ -47,6 +45,11 @@ function gen_map(c_name)
   function tmpl.write(self, section, value)
     value = value:gsub("\r\n?", "\n")
     nixio.fs.writefile("/etc/config/template/smb.conf.template", value)
+  end
+
+  local reset_temp = s:taboption("template", Button, "_reset", translate("Reset template"))
+  reset_temp.write = function(self, section, value)
+    nixio.fs.copy(SYSROOT .. "/etc/config/template/smb.conf.template", "/etc/config/template/smb.conf.template")
   end
 
   -- for users setting
@@ -102,8 +105,7 @@ function gen_map(c_name)
   end
 
   -- for share setting
-  s = m:section(TypedSection, "sambashare", translate("Shared Directories")
-    , translate("Please add directories to share. Each directory refers to a folder on a mounted device."))
+  s = m:section(TypedSection, "sambashare", translate("Shared Directories"), translate("Please add directories to share. Each directory refers to a folder on a mounted device."))
   s.anonymous = true
   s.addremove = true
   s.template = "cbi/tblsection"
@@ -112,16 +114,16 @@ function gen_map(c_name)
   name.rmempty = true
   pth = s:option(Value, "path", translate("Path"))
   if nixio.fs.access("/etc/config/fstab") then
-          pth.titleref = luci.dispatcher.build_url("admin", "system", "fstab")
+    pth.titleref = luci.dispatcher.build_url("admin", "system", "fstab")
   end
 
   users=s:option(MultiValue, "users", translate("Allowed users"))
   users.rmempty = true
   -- users.widget = "select"
   m.uci:foreach(c_name, "sambauser",
-          function(i)
-            users:value(i.username, i.username)
-          end)
+    function(i)
+      users:value(i.username, i.username)
+    end)
 
   local ro = s:option(Flag, "read_only", translate("Read-only"))
   ro.rmempty = false
@@ -139,12 +141,10 @@ function gen_map(c_name)
   go.enabled = "yes"
   go.disabled = "no"
 
-  local cm = s:option(Value, "create_mask", translate("Create mask"),
-          translate("Mask for new files"))
+  local cm = s:option(Value, "create_mask", translate("Create mask"), translate("Mask for new files"))
   cm.rmempty = true
 
-  local dm = s:option(Value, "dir_mask", translate("Directory mask"),
-          translate("Mask for new directories"))
+  local dm = s:option(Value, "dir_mask", translate("Directory mask"), translate("Mask for new directories"))
   dm.rmempty = true
   return m
 end
@@ -168,7 +168,7 @@ for _, v in pairs(containers) do
 end
 if exists ~= 0 then
   local res
-  if exists.State:lower() ~= "running" then
+  if exists and exists.State and exists.State:lower() ~= "running" then
     res = dk.containers:start(pod_name)
   end
   if res and res.code ~= 204 then return end
