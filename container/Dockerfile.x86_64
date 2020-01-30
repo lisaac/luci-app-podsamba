@@ -15,6 +15,8 @@ RUN apk --no-cache --no-progress upgrade && \
 
 EXPOSE 137/udp 138/udp 139 445
 
+VOLUME ["/etc/samba"]
+
 HEALTHCHECK --interval=600s --timeout=15s \
             CMD smbclient -L '\\localhost' -U '%' -m SMB3
 
