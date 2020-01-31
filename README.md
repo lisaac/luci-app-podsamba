@@ -49,4 +49,7 @@ docker restart luci
 - 创建容器时默认只挂载`/media`到容器内部, 需要其他目录, 请在创建时自行添加
 - 配置文件保存在宿主机`$HOME/pods/luci/conf.d/config/luci_plugin_samba`中
 
+## 谢致
+- [dperson/samba](https://github.com/dperson/samba)
+
 Enjoy
