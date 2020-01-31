@@ -9,7 +9,7 @@
   # ↑ Please do NOT edit the above content
   server signing = auto
   dns proxy = no
-  pam password change = yes
+  pam password change = no
   map to guest = bad user
   usershare allow guests = yes
   create mask = 0664
@@ -35,10 +35,12 @@
   log file = /var/log/samba/log.%m
 
   # Security
+  server min protocol = LANMAN1
+  client ipc min protocol = LANMAN1
+  client min protocol = LANMAN1
   client ipc max protocol = SMB3
   client max protocol = SMB3
   server max protocol = SMB3
-  server min protocol = LANMAN1
 
   # Time Machine
   fruit:metadata = stream
