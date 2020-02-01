@@ -13,11 +13,7 @@
   map to guest = bad user
   usershare allow guests = yes
   create mask = 0664
-  force create mode = 0664
   directory mask = 0775
-  force directory mode = 0775
-  force user = smbuser
-  force group = smb
   follow symlinks = yes
   load printers = no
   printing = bsd
