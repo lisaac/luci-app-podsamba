@@ -13,7 +13,7 @@ local dk = docker.new()
 local pod_name= "luci_plugin_samba"
 local image_name = "luci-plugin-samba"
 --, filters = {ancestor={image_name}}
-local containers = dk:list(nil, {all = true}).body
+local containers = dk:list(pod_name, {all = true}).body
 local SYSROOT = os.getenv("LUCI_SYSROOT")
 
 function gen_map(c_name)
@@ -154,7 +154,7 @@ function create_container(c_name)
           " --restart unless-stopped "..
           "-e TZ=Asia/Shanghai "..
           "--network host "..
-          "-v /media:/media:rslave "..
+          "-v /media:/media:rslave,ro "..
           "lisaac/luci-plugin-samba"
   luci.http.redirect(luci.dispatcher.build_url("admin/docker/newcontainer/".. luci.util.urlencode(cmd)))
 end
@@ -173,9 +173,7 @@ if exists ~= 0 then
   end
   if res and res.code ~= 204 then return end
   local map_name = "luci_plugin_samba"
-  if not nixio.fs.access("/etc/config/"..map_name) then
-    nixio.fs.copy(SYSROOT .. "/etc/config/template/samba", "/etc/config/"..map_name)
-  end
+  if not nixio.fs.access("/etc/config/"..map_name) then return  end
   nixio.fs.mkdirr("/etc/config/template/")
   if not nixio.fs.access("/etc/config/template/smb.conf.template") then
     nixio.fs.copy(SYSROOT .. "/etc/config/template/smb.conf.template", "/etc/config/template/smb.conf.template")

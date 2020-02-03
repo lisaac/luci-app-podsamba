@@ -1,5 +1,5 @@
-# Samba docker container
-Samba docker container, 作为 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 插件, 通过 luci 进行配置
+# Samba
+Samba running in container, 作为 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 插件, 通过 luci 进行配置
 
 ## Depends / 依赖
 - [luci-lib-docker](https://github.com/lisaac/luci-lib-docker)
@@ -32,7 +32,7 @@ docker run -d \
 git clone https://github.com/lisaac/luci-lib-docker $HOME/pods/luci/plugin/luci-lib-docker
 git clone https://github.com/lisaac/luci-app-dockerman $HOME/pods/luci/plugin/luci-app-dockerman
 # 安装插件
-git clone http://github.com/lisaac/luci-plugin-samba $HOME/pods/luci/plugin/luci-lib-docker
+git clone http://github.com/lisaac/luci-plugin-samba $HOME/pods/luci/plugin/luci-plugin-samba
 
 # 重启luci容器
 docker restart luci
@@ -41,7 +41,7 @@ docker restart luci
 ### 使用
 部署完成后, 浏览器访问宿主机 ip, 即可得到 `luci` 页面, 通过 `Services -> Samba in container` 配置
 首次进入会跳转至创建容器页面, 请按自己需求配置, 创建完成后,再次进入`Services -> Samba in container`即可配置
-配置类似`openwrt`, 加入自定义用户支持
+配置类似 `openwrt`, 支持自定义 `samba` 用户及 `uid`
 
 ## 说明
 - 容器名为`luci_plugin_samba`, 请勿修改
