@@ -9,11 +9,11 @@ $Id$
 ]]--
 
 local docker = require "luci.docker"
-local dk = docker.new()
+local dk = docker.new({socket_path="/var/run/docker.sock"})
 local pod_name= "luci_plugin_samba"
 local image_name = "luci-plugin-samba"
 --, filters = {ancestor={image_name}}
-local containers = dk:list(pod_name, {all = true}).body
+local containers = dk:list({name=pod_name, query = {all = true}}).body
 local SYSROOT = os.getenv("LUCI_SYSROOT")
 
 function gen_map(c_name)
@@ -169,7 +169,7 @@ end
 if exists ~= 0 then
   local res
   if exists and exists.State and exists.State:lower() ~= "running" then
-    res = dk.containers:start(pod_name)
+    res = dk.containers:start({name=pod_name})
   end
   if res and res.code ~= 204 then return end
   local map_name = "luci_plugin_samba"
@@ -178,7 +178,7 @@ if exists ~= 0 then
   if not nixio.fs.access("/etc/config/template/smb.conf.template") then
     nixio.fs.copy(SYSROOT .. "/etc/config/template/smb.conf.template", "/etc/config/template/smb.conf.template")
   end
-  res = dk.containers:get_archive(pod_name, {path = "/etc/samba/smbpasswd"})
+  res = dk.containers:get_archive({name=pod_name, query={path = "/etc/samba/smbpasswd"}})
   if res and res.code == 200 then
     nixio.fs.mkdirr("/tmp/conf.d/"..pod_name)
     nixio.fs.writefile("/tmp/conf.d/"..pod_name.."/pod_conf.tar", table.concat(res.body))
