@@ -150,7 +150,7 @@ function gen_map(c_name)
 end
 
 function create_container(c_name)
-  local cmd = "docker create  -d --name ".. c_name ..
+  local cmd = "DOCKERCLI -d --name ".. c_name ..
           " --restart unless-stopped "..
           "-e TZ=Asia/Shanghai "..
           "--network host "..
