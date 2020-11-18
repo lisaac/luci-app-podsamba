@@ -1,5 +1,5 @@
-# Samba
-Samba running in container, 作为 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 插件, 通过 luci 进行配置
+# PODSamba
+Samba running in container, 作为 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 插件, 通过 luci 进行配置, 作为内置插件集成在 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 中。
 
 ## Depends / 依赖
 - [luci-lib-docker](https://github.com/lisaac/luci-lib-docker)
@@ -7,7 +7,7 @@ Samba running in container, 作为 [luci-in-docker](https://github.com/lisaac/lu
 
 ## Quick start / 快速开始
 
-### 部署 [luci-in-docker](https://github.com/lisaac/luci-in-docker)
+### 部署 [`lisaac/luci`](https://hub.docker.com/r/lisaac/luci)
 ```
 docker run -d \
   --name luci \
@@ -26,7 +26,18 @@ docker run -d \
   lisaac/luci
 ```
 
-### 安装插件
+### 使用
+部署完成后, 浏览器访问宿主机 ip, 即可得到 `luci` 页面, 通过 `Services -> Samba in container` 配置
+首次进入会跳转至创建容器页面, 请按自己需求配置, 创建完成后,再次进入`Services -> Samba in container`即可配置
+配置类似 `openwrt`, 支持自定义 `samba` 用户及 `uid`
+
+## 说明
+- 容器名为`pod_samba`, 请勿修改
+- 容器默认通过`host`网络进行部署, 如果想要修改, 请在创建时自行修改内容, 若改为`bridge`模式, 确保暴露`137/138/139/445`端口
+- 创建容器时默认只挂载`/media`到容器内部, 需要其他目录, 请在创建时自行添加
+- 配置文件保存在宿主机`$HOME/pods/luci/conf.d/config/pod_samba`中
+
+## 使用 [`lisaac/luci:nano`](https://hub.docker.com/r/lisaac/luci) 部署
 ```
 # 添加插件依赖
 git clone https://github.com/lisaac/luci-lib-docker $HOME/pods/luci/plugin/luci-lib-docker
@@ -37,17 +48,6 @@ git clone http://github.com/lisaac/luci-plugin-samba $HOME/pods/luci/plugin/luci
 # 重启luci容器
 docker restart luci
 ```
-
-### 使用
-部署完成后, 浏览器访问宿主机 ip, 即可得到 `luci` 页面, 通过 `Services -> Samba in container` 配置
-首次进入会跳转至创建容器页面, 请按自己需求配置, 创建完成后,再次进入`Services -> Samba in container`即可配置
-配置类似 `openwrt`, 支持自定义 `samba` 用户及 `uid`
-
-## 说明
-- 容器名为`luci_plugin_samba`, 请勿修改
-- 容器默认通过`host`网络进行部署, 如果想要修改, 请在创建时自行修改内容, 若改为`bridge`模式, 确保暴露`137/138/139/445`端口
-- 创建容器时默认只挂载`/media`到容器内部, 需要其他目录, 请在创建时自行添加
-- 配置文件保存在宿主机`$HOME/pods/luci/conf.d/config/luci_plugin_samba`中
 
 ## 谢致
 - [dperson/samba](https://github.com/dperson/samba)

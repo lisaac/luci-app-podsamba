@@ -1,6 +1,6 @@
 FROM alpine
 
-MAINTAINER lisaac <lisaac.cn@gmail.com>
+LABEL MAINTAINER lisaac <lisaac.cn@gmail.com>
 
 ENV TZ=Asia/Shanghai
 
