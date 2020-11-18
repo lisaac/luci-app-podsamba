@@ -1,0 +1,11 @@
+config samba 'samba'
+        option 'name' 'LuCI'
+        option 'description' 'Pod-Samba'
+        option 'workgroup' 'WORKGROUP'
+        option 'homes' '0'
+
+config samba 'pod'
+        option pod_smb_config '/etc/samba/smb.conf'
+        option pod_smb_passwd '/etc/samba/smbpasswd'
+        option pod_name 'pod_samba'
+        option image_name 'lisaac/podsamba'
