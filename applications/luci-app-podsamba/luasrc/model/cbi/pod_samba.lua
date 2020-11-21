@@ -8,8 +8,8 @@ You may obtain a copy of the License at
 $Id$
 ]]--
 
-local docker = require "luci.docker"
-local dk = docker.new({socket_path="/var/run/docker.sock"})
+local docker = require "luci.model.docker"
+local dk = docker.new()
 local pod_name = luci.model.uci:get("pod_samba", "pod", "pod_name")
 local image_name = luci.model.uci:get("pod_samba", "pod", "image_name")
 local pod_smb_config = luci.model.uci:get("pod_samba", "pod", "pod_smb_config")
@@ -31,7 +31,7 @@ else
   nixio.fs.writefile(tmp_conf_dir.."/smbpasswd", "")
   local res = dk.containers:inspect({ name = pod_name})
   if res == 200 then
-    m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/newcontainer/".. luci.util.urlencode(cmd)).."' >".. translate("the Pod(container)「".. pod_name.. "」can NOT connect, please start it first!") .. "</a>")
+    m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/container/"..pod_name).."' >".. translate("the Pod(container)「".. pod_name.. "」can NOT connect, please start it first!") .. "</a>")
   else
     local cmd = "DOCKERCLI -d --name ".. pod_name ..
             " --restart unless-stopped "..

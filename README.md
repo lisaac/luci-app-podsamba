@@ -1,10 +1,6 @@
 # PODSamba
 Samba running in container, 作为 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 插件, 通过 luci 进行配置, 作为内置插件集成在 [luci-in-docker](https://github.com/lisaac/luci-in-docker) 中。
 
-## Depends / 依赖
-- [luci-lib-docker](https://github.com/lisaac/luci-lib-docker)
-- [luci-app-dockerman](https://github.com/lisaac/luci-app-dockerman)
-
 ## Quick start / 快速开始
 
 ### 部署 [`lisaac/luci`](https://hub.docker.com/r/lisaac/luci)
@@ -38,12 +34,16 @@ docker run -d \
 - 配置文件保存在宿主机`$HOME/pods/luci/conf.d/config/pod_samba`中
 
 ## 使用 [`lisaac/luci:nano`](https://hub.docker.com/r/lisaac/luci) 部署
+
+### Depends / 依赖
+- [luci-lib-docker](https://github.com/lisaac/luci-lib-docker)
+- [luci-app-dockerman](https://github.com/lisaac/luci-app-dockerman)
 ```
 # 添加插件依赖
 git clone https://github.com/lisaac/luci-lib-docker $HOME/pods/luci/plugin/luci-lib-docker
 git clone https://github.com/lisaac/luci-app-dockerman $HOME/pods/luci/plugin/luci-app-dockerman
 # 安装插件
-git clone http://github.com/lisaac/luci-plugin-samba $HOME/pods/luci/plugin/luci-plugin-samba
+git clone http://github.com/lisaac/luci-app-podsamba $HOME/pods/luci/plugin/luci-app-podsamba
 
 # 重启luci容器
 docker restart luci
