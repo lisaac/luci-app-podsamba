@@ -12,6 +12,7 @@ RUN apk --no-cache --no-progress upgrade && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     addgroup -S smb && \
     adduser -S -D -H -h /tmp -s /sbin/nologin -G smb -g 'Samba User' smbuser && \
+    touch /etc/samba/smbpasswd && \
     chmod +x /usr/bin/smbuser && \
     chmod +x /init.sh
 

@@ -15,23 +15,33 @@ local image_name = luci.model.uci:get("pod_samba", "pod", "image_name")
 local pod_smb_config = luci.model.uci:get("pod_samba", "pod", "pod_smb_config")
 local pod_smb_passwd = luci.model.uci:get("pod_samba", "pod", "pod_smb_passwd")
 local tmp_conf_dir = "/tmp/conf.d/"..pod_name.."/"
-local pod_alive = false
 
 local m
-
-local res = dk.containers:get_archive({ name = pod_name, query = { path = pod_smb_passwd }})
+local res = dk.containers:inspect({name=pod_name})
 if res and res.code == 200 then
-  pod_alive = true
-  nixio.fs.mkdirr(tmp_conf_dir)
-  nixio.fs.writefile(tmp_conf_dir.."pod_conf.tar", table.concat(res.body))
-  luci.util.exec("tar xf "..tmp_conf_dir.."pod_conf.tar -C "..tmp_conf_dir)
-  m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/container/"..pod_name).."' >Pod: "..pod_name .. "</a>")
+  local response = dk.containers:get_archive({ name = pod_name, query = { path = pod_smb_passwd }})
+  if response and response.code < 300 then
+    nixio.fs.mkdirr(tmp_conf_dir)
+    nixio.fs.writefile(tmp_conf_dir.."pod_conf.tar", table.concat(response.body))
+    luci.util.exec("tar xf "..tmp_conf_dir.."pod_conf.tar -C "..tmp_conf_dir)
+    m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/container/"..pod_name).."' >Pod: "..pod_name .. "</a>")
+  else
+    m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/container/"..pod_name).."' >".. translate("Can NOT get 「smbpasswd」 file form the Pod(container)「".. pod_name.. "」, please check the it") .. "</a>")
+    -- since there no pod, so disable apply & save button
+    m.formvalue = function(self, x, ...)
+      if x == "cbi.skip" then
+        return true
+      else
+        m.formvalue(self, ...)
+      end
+    end
+  end
 else
   nixio.fs.mkdirr(tmp_conf_dir)
   nixio.fs.writefile(tmp_conf_dir.."/smbpasswd", "")
   local res = dk.containers:inspect({ name = pod_name})
   if res == 200 then
-    m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/container/"..pod_name).."' >".. translate("the Pod(container)「".. pod_name.. "」can NOT connect, please start it first!") .. "</a>")
+    m = Map("pod_samba", translate("POD Samba"), "<a href='"..luci.dispatcher.build_url("admin/docker/container/"..pod_name).."' >".. translate("The Pod(container)「".. pod_name.. "」can NOT connect, please start it first!") .. "</a>")
   else
     local cmd = "DOCKERCLI -d --name ".. pod_name ..
             " --restart unless-stopped "..
